@@ -13,6 +13,30 @@ const (
 	COLS = 100
 )
 
+func placeFirework(xCoord, yCoord int, window *[ROWS][COLS]rune) {
+	window[xCoord][yCoord] = 'O'
+	// 8 adjacent cells to x,y pos
+	offsets := [8][2]int{
+		{0, 1},
+		{0, -1},
+		{-1, 0},
+		{1, 0},
+		{-1, -1},
+		{-1, 1},
+		{1, -1},
+		{1, 1},
+	}
+	for _, offset := range offsets {
+		rowOffset, colOffset := offset[0], offset[1]
+		newX := int(xCoord) + rowOffset
+		newY := int(yCoord) + colOffset
+		if newX < 0 || newX >= len(window) || newY < 0 || newY >= len(window[0]) {
+			continue
+		}
+		window[newX][newY] = 'A'
+	}
+}
+
 func render() {
 	writer := bufio.NewWriter(os.Stdout)
 
@@ -24,8 +48,8 @@ func render() {
 
 		writer.Flush() // Flush the clear screen command immediately
 
-		x_coord := int(rand.Uint32() % uint32(ROWS))
-		y_coord := int(rand.Uint32() % uint32(COLS))
+		xCoord := int(rand.Uint32() % uint32(ROWS))
+		yCoord := int(rand.Uint32() % uint32(COLS))
 
 		cells := [ROWS][COLS]rune{}
 
@@ -34,7 +58,7 @@ func render() {
 				cells[i][j] = '-'
 			}
 		}
-		cells[x_coord][y_coord] = 'O'
+		placeFirework(xCoord, yCoord, &cells)
 		for i := 0; i < ROWS; i++ {
 			for j := 0; j < COLS; j++ {
 				fmt.Fprintf(writer, "%c ", cells[i][j])
