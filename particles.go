@@ -13,7 +13,22 @@ const (
 	COLS = 100
 )
 
-func renderFirework(xCoord, yCoord int, window *[ROWS][COLS]rune, depth int, writer *bufio.Writer) {
+func getRandomColour() string {
+	colours := []string{
+		"\033[0m",
+		"\033[30m",
+		"\033[31m",
+		"\033[32m",
+		"\033[33m",
+		"\033[34m",
+		"\033[35m",
+		"\033[36m",
+		"\033[37m",
+	}
+	return colours[rand.Intn(len(colours))]
+}
+
+func renderFirework(xCoord, yCoord int, window *[ROWS][COLS]string, depth int, writer *bufio.Writer) {
 	offsets := [8][2]int{
 		{0, 1},
 		{0, -1},
@@ -35,7 +50,7 @@ func renderFirework(xCoord, yCoord int, window *[ROWS][COLS]rune, depth int, wri
 			cur_cell := queue[0]
 			cur_cell_x, cur_cell_y := cur_cell[0], cur_cell[1]
 			queue = queue[1:]
-			window[cur_cell_x][cur_cell_y] = 'x'
+      window[cur_cell_x][cur_cell_y] = fmt.Sprintf("%v%v", getRandomColour() ,"x")
 
 			for _, offset := range offsets {
 				rowOffset, colOffset := offset[0], offset[1]
@@ -43,7 +58,7 @@ func renderFirework(xCoord, yCoord int, window *[ROWS][COLS]rune, depth int, wri
 				if newX < 0 || newX >= len(window) || newY < 0 || newY >= len(window[0]) {
 					continue
 				}
-				if window[newX][newY] == 'x' {
+				if window[newX][newY] == "x" {
 					continue
 				}
 				queue = append(queue, []int{newX, newY})
@@ -56,11 +71,11 @@ func renderFirework(xCoord, yCoord int, window *[ROWS][COLS]rune, depth int, wri
 	}
 }
 
-func write(writer *bufio.Writer, cells *[ROWS][COLS]rune) {
+func write(writer *bufio.Writer, cells *[ROWS][COLS]string) {
 	fmt.Fprint(writer, "\033[H")
 	for i := 0; i < ROWS; i++ {
 		for j := 0; j < COLS; j++ {
-			fmt.Fprintf(writer, "%c ", cells[i][j])
+			fmt.Fprintf(writer, "%v ", cells[i][j])
 		}
 		fmt.Fprintln(writer)
 	}
@@ -73,20 +88,20 @@ func render() {
 		fmt.Fprint(writer, "\033[H") /* Write ANSI escape sequence to move the cursor to top left corner. Although, this
 		   sequence is not meant for clearing the screen but it works for me ¯\_(ツ)_/¯ i.e
 		   clears the screen. And the actual sequence \033[2J that should clear the screen
-		   doesn't work. */
+		   doesn"t work. */
 
 		writer.Flush() // Flush the clear screen command immediately
 
 		xCoord := int(rand.Uint32() % uint32(ROWS))
 		yCoord := int(rand.Uint32() % uint32(COLS))
 
-		cells := [ROWS][COLS]rune{}
+		cells := [ROWS][COLS]string{}
 		for i := 0; i < ROWS; i++ {
 			for j := 0; j < COLS; j++ {
-				cells[i][j] = ' '
+				cells[i][j] = " "
 			}
 		}
-		depth := int(rand.Uint32() % 6)
+		depth := int(rand.Intn(6))
 		renderFirework(xCoord, yCoord, &cells, depth, writer)
 	}
 }
