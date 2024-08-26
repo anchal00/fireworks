@@ -13,9 +13,7 @@ const (
 	COLS = 100
 )
 
-func placeFirework(xCoord, yCoord int, window *[ROWS][COLS]rune) {
-	window[xCoord][yCoord] = 'O'
-	// 8 adjacent cells to x,y pos
+func renderFirework(xCoord, yCoord int, window *[ROWS][COLS]rune, depth int, writer *bufio.Writer) {
 	offsets := [8][2]int{
 		{0, 1},
 		{0, -1},
@@ -26,20 +24,51 @@ func placeFirework(xCoord, yCoord int, window *[ROWS][COLS]rune) {
 		{1, -1},
 		{1, 1},
 	}
-	for _, offset := range offsets {
-		rowOffset, colOffset := offset[0], offset[1]
-		newX := int(xCoord) + rowOffset
-		newY := int(yCoord) + colOffset
-		if newX < 0 || newX >= len(window) || newY < 0 || newY >= len(window[0]) {
-			continue
+	queue := [][]int{{xCoord, yCoord}}
+
+	for depth >= 0 {
+		size := len(queue)
+		if size == 0 {
+			return
 		}
-		window[newX][newY] = 'A'
+		for i := 0; i < size; i++ {
+			cur_cell := queue[0]
+			cur_cell_x, cur_cell_y := cur_cell[0], cur_cell[1]
+			queue = queue[1:]
+			window[cur_cell_x][cur_cell_y] = 'x'
+
+			for _, offset := range offsets {
+				rowOffset, colOffset := offset[0], offset[1]
+				newX, newY := rowOffset+cur_cell_x, colOffset+cur_cell_y
+				if newX < 0 || newX >= len(window) || newY < 0 || newY >= len(window[0]) {
+					continue
+				}
+				if window[newX][newY] == 'x' {
+					continue
+				}
+				queue = append(queue, []int{newX, newY})
+			}
+		}
+		// render here
+		write(writer, window)
+		depth--
+		time.Sleep(200 * time.Millisecond)
 	}
+}
+
+func write(writer *bufio.Writer, cells *[ROWS][COLS]rune) {
+	fmt.Fprint(writer, "\033[H")
+	for i := 0; i < ROWS; i++ {
+		for j := 0; j < COLS; j++ {
+			fmt.Fprintf(writer, "%c ", cells[i][j])
+		}
+		fmt.Fprintln(writer)
+	}
+	writer.Flush()
 }
 
 func render() {
 	writer := bufio.NewWriter(os.Stdout)
-
 	for {
 		fmt.Fprint(writer, "\033[H") /* Write ANSI escape sequence to move the cursor to top left corner. Although, this
 		   sequence is not meant for clearing the screen but it works for me ¯\_(ツ)_/¯ i.e
@@ -52,21 +81,12 @@ func render() {
 		yCoord := int(rand.Uint32() % uint32(COLS))
 
 		cells := [ROWS][COLS]rune{}
-
 		for i := 0; i < ROWS; i++ {
 			for j := 0; j < COLS; j++ {
-				cells[i][j] = '-'
+				cells[i][j] = ' '
 			}
 		}
-		placeFirework(xCoord, yCoord, &cells)
-		for i := 0; i < ROWS; i++ {
-			for j := 0; j < COLS; j++ {
-				fmt.Fprintf(writer, "%c ", cells[i][j])
-			}
-			fmt.Fprintln(writer)
-		}
-		writer.Flush()
-
-		time.Sleep(1 * time.Second)
+		depth := int(rand.Uint32() % 6)
+		renderFirework(xCoord, yCoord, &cells, depth, writer)
 	}
 }
