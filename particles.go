@@ -16,21 +16,31 @@ const (
 
 func getRandomColour() string {
 	colours := []string{
-		// "\033[30m", // Black text
-		"\033[31m", // Red text
-		"\033[91m", // Bright Red text
-		"\033[32m", // Green text
-		"\033[92m", // Green text
-		"\033[33m", // Yellow text
-		"\033[93m", // Yellow text
-		"\033[34m", // Blue text
-		"\033[94m", // Blue text
-		"\033[35m", // Magenta text
-		"\033[95m", // Magenta text
-		"\033[36m", // Cyan text
-		"\033[96m", // Cyan text
-		"\033[37m", // White text
-		"\033[97m", // White text
+		"\033[38;5;196m", // Bright Red
+		"\033[38;5;208m", // Bright Orange
+		"\033[38;5;226m", // Bright Yellow
+		"\033[38;5;46m",  // Bright Green
+		"\033[38;5;51m",  // Bright Cyan
+		"\033[38;5;45m",  // Bright Blue
+		"\033[38;5;201m", // Bright Magenta
+		"\033[38;5;213m", // Bright Pink
+		"\033[38;5;129m", // Bright Purple
+		"\033[38;5;154m", // Bright Lime Green
+		"\033[38;5;111m", // Bright Sky Blue
+		"\033[38;5;51m",  // Bright Turquoise
+		"\033[38;5;220m", // Bright Gold
+		"\033[38;5;135m", // Bright Violet
+		"\033[38;5;203m", // Bright Coral
+		"\033[38;5;85m",  // Bright Mint Green
+		"\033[38;5;217m", // Bright Light Pink
+		"\033[38;5;159m", // Bright Light Blue
+		"\033[38;5;216m", // Bright Peach
+		"\033[38;5;229m", // Bright Light Yellow
+		"\033[38;5;195m", // Bright Light Cyan
+		"\033[38;5;156m", // Bright Light Green
+		"\033[38;5;99m",  // Bright Indigo
+		"\033[38;5;183m", // Bright Lavender
+		"\033[38;5;122m", // Bright Aquamarine
 	}
 	return colours[rand.Intn(len(colours))]
 }
