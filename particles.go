@@ -54,7 +54,7 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 			}
 		}
 		write(writer, window)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(150 * time.Millisecond)
 	}
 }
 
@@ -82,6 +82,7 @@ func render() {
 		xCoord := int(rand.Uint32() % uint32(ROWS))
 		yCoord := int(rand.Uint32() % uint32(COLS))
 
+		// center the coordinates
 		xCoord = max(xCoord, 20)
 		xCoord = min(xCoord, 30)
 		yCoord = max(yCoord, 20)
