@@ -27,7 +27,7 @@ func getRandomColour() string {
 		"\033[94m", // Blue text
 		"\033[35m", // Magenta text
 		"\033[95m", // Magenta text
-    "\033[36m", // Cyan text
+		"\033[36m", // Cyan text
 		"\033[96m", // Cyan text
 		"\033[37m", // White text
 		"\033[97m", // White text
@@ -35,19 +35,31 @@ func getRandomColour() string {
 	return colours[rand.Intn(len(colours))]
 }
 
+func getRandomChar() string {
+	markers := []string{
+		"x",
+		"X",
+		"*",
+		"0",
+		"+",
+	}
+	return markers[rand.Intn(len(markers))]
+}
+
 func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *bufio.Writer) {
-	last_char := "./'"
+	lastChar := "./'"
 	for i := ROWS - 1; i > cx; i-- {
-		if last_char == "./'" {
+		if lastChar == "./'" {
 			window[i][cy] = "\\"
-			last_char = "\\"
+			lastChar = "\\"
 		} else {
 			window[i][cy] = "./'"
-			last_char = "./'"
+			lastChar = "./'"
 		}
 		write(writer, window)
 		time.Sleep(7 * time.Millisecond)
 	}
+	explosionMarker := getRandomChar()
 	for i := 1; i <= radius; i++ {
 		colour := getRandomColour()
 		for y := 0; y < COLS; y++ {
@@ -56,14 +68,14 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 				dy := y - cy
 				distance := math.Sqrt(float64(dx*dx + dy*dy))
 				if distance <= float64(i) && window[x][y] == " " {
-					window[x][y] = fmt.Sprintf("%v\033[1m%v", colour, "x") // \033[1m makes text bold
+					window[x][y] = fmt.Sprintf("%v\033[1m%v", colour, explosionMarker) // \033[1m makes text bold
 				}
 			}
 		}
 		write(writer, window)
 		time.Sleep(150 * time.Millisecond)
 	}
-  // Fade away seq 1
+	// Fade away seq 1
 	for i := 1; i <= radius; i++ {
 		for y := COLS - 1; y >= 0; y-- {
 			for x := ROWS - 1; x >= 0; x-- {
@@ -78,9 +90,9 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 		write(writer, window)
 		time.Sleep(150 * time.Millisecond)
 	}
-  // Fade away seq 2
+	// Fade away seq 2
 	for i := ROWS - 1; i > cx; i-- {
-    window[i][cy] = " "
+		window[i][cy] = " "
 		write(writer, window)
 		time.Sleep(5 * time.Millisecond)
 	}
