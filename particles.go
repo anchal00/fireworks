@@ -16,14 +16,21 @@ const (
 
 func getRandomColour() string {
 	colours := []string{
-		"\033[30m", // Black text
+		// "\033[30m", // Black text
 		"\033[31m", // Red text
+		"\033[91m", // Bright Red text
 		"\033[32m", // Green text
+		"\033[92m", // Green text
 		"\033[33m", // Yellow text
+		"\033[93m", // Yellow text
 		"\033[34m", // Blue text
+		"\033[94m", // Blue text
 		"\033[35m", // Magenta text
-		"\033[36m", // Cyan text
+		"\033[95m", // Magenta text
+    "\033[36m", // Cyan text
+		"\033[96m", // Cyan text
 		"\033[37m", // White text
+		"\033[97m", // White text
 	}
 	return colours[rand.Intn(len(colours))]
 }
@@ -39,7 +46,7 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 			last_char = "./'"
 		}
 		write(writer, window)
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(7 * time.Millisecond)
 	}
 	for i := 1; i <= radius; i++ {
 		colour := getRandomColour()
@@ -55,6 +62,27 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 		}
 		write(writer, window)
 		time.Sleep(150 * time.Millisecond)
+	}
+  // Fade away seq 1
+	for i := 1; i <= radius; i++ {
+		for y := COLS - 1; y >= 0; y-- {
+			for x := ROWS - 1; x >= 0; x-- {
+				dx := x - cx
+				dy := y - cy
+				distance := math.Sqrt(float64(dx*dx + dy*dy))
+				if distance <= float64(i) {
+					window[x][y] = " "
+				}
+			}
+		}
+		write(writer, window)
+		time.Sleep(150 * time.Millisecond)
+	}
+  // Fade away seq 2
+	for i := ROWS - 1; i > cx; i-- {
+    window[i][cy] = " "
+		write(writer, window)
+		time.Sleep(5 * time.Millisecond)
 	}
 }
 
@@ -93,7 +121,7 @@ func render() {
 				cells[i][j] = " "
 			}
 		}
-		depth := int(rand.Intn(6))
+		depth := int(rand.Intn(6)) + 2
 		renderFirework(xCoord, yCoord, &cells, depth, writer)
 	}
 }
