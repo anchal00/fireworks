@@ -29,6 +29,18 @@ func getRandomColour() string {
 }
 
 func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *bufio.Writer) {
+	last_char := "/"
+	for i := ROWS - 1; i > cx; i-- {
+		if last_char == "/" {
+			window[i][cy] = "\\"
+			last_char = "\\"
+		} else {
+			window[i][cy] = "/"
+			last_char = "/"
+		}
+		write(writer, window)
+		time.Sleep(10 * time.Millisecond)
+	}
 	for i := 1; i <= radius; i++ {
 		colour := getRandomColour()
 		for y := 0; y < COLS; y++ {
@@ -36,8 +48,8 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 				dx := x - cx
 				dy := y - cy
 				distance := math.Sqrt(float64(dx*dx + dy*dy))
-				if distance <= float64(i) {
-					window[x][y] = fmt.Sprintf("%v\033[1m%v", colour, "+") // \033[1m makes text bold
+				if distance <= float64(i) && window[x][y] == " " {
+					window[x][y] = fmt.Sprintf("%v\033[1m%v", colour, "x") // \033[1m makes text bold
 				}
 			}
 		}
@@ -59,7 +71,6 @@ func write(writer *bufio.Writer, cells *[ROWS][COLS]string) {
 
 func render() {
 	writer := bufio.NewWriter(os.Stdout)
-
 	for {
 		fmt.Fprint(writer, "\033[H\033[0m") /* Write ANSI escape sequence to move the cursor to top left corner. Although, this
 		   sequence is not meant for clearing the screen but it works for me ¯\_(ツ)_/¯ i.e
