@@ -29,14 +29,14 @@ func getRandomColour() string {
 }
 
 func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *bufio.Writer) {
-	last_char := "/"
+	last_char := "./'"
 	for i := ROWS - 1; i > cx; i-- {
-		if last_char == "/" {
+		if last_char == "./'" {
 			window[i][cy] = "\\"
 			last_char = "\\"
 		} else {
-			window[i][cy] = "/"
-			last_char = "/"
+			window[i][cy] = "./'"
+			last_char = "./'"
 		}
 		write(writer, window)
 		time.Sleep(10 * time.Millisecond)
@@ -54,7 +54,7 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 			}
 		}
 		write(writer, window)
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -82,6 +82,10 @@ func render() {
 		xCoord := int(rand.Uint32() % uint32(ROWS))
 		yCoord := int(rand.Uint32() % uint32(COLS))
 
+		xCoord = max(xCoord, 20)
+		xCoord = min(xCoord, 30)
+		yCoord = max(yCoord, 20)
+		yCoord = min(yCoord, 80)
 		cells := [ROWS][COLS]string{}
 		for i := 0; i < ROWS; i++ {
 			for j := 0; j < COLS; j++ {
