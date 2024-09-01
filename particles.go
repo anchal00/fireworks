@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"os/signal"
 	"sync"
 	"time"
 )
@@ -147,6 +148,15 @@ func create(cells *[ROWS][COLS]string, writer *bufio.Writer, wg *sync.WaitGroup)
 func render() {
 	cells := [ROWS][COLS]string{}
 	writer := bufio.NewWriter(os.Stdout)
+	channel := make(chan os.Signal, 1)
+	signal.Notify(channel, os.Interrupt)
+	go func() {
+		<-channel
+		fmt.Fprintln(writer, "\033[2J\033[H\033[0m\n\nExiting.....Goodbye !\n")
+		writer.Flush() // Flush the clear screen command immediately
+		os.Exit(0)
+	}()
+
 	for {
 		fmt.Fprint(writer, "\033[H\033[0m") /* Write ANSI escape sequence to move the cursor to top left corner. Although, this
 		   sequence is not meant for clearing the screen but it works for me ¯\_(ツ)_/¯ i.e
