@@ -1,4 +1,4 @@
-# fireworks
+# fireworks 🎇
 A crude attempt to simulate fireworks in Go.
 
 ### How to run
