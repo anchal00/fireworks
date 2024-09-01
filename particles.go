@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -13,6 +14,8 @@ const (
 	ROWS = 50
 	COLS = 100
 )
+
+var outputWriterLock = sync.RWMutex{}
 
 func getRandomColour() string {
 	colours := []string{
@@ -49,7 +52,7 @@ func getRandomChar() string {
 	markers := []string{
 		"~",
 		"x",
-		"X",
+		"-",
 		"*",
 		"0",
 		"+",
@@ -58,14 +61,14 @@ func getRandomChar() string {
 }
 
 func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *bufio.Writer) {
-	lastChar := "./'"
+	lastChar := "^"
 	for i := ROWS - 1; i > cx; i-- {
-		if lastChar == "./'" {
-			window[i][cy] = "\\"
-			lastChar = "\\"
+		if lastChar == "^" {
+			window[i][cy] = "|"
+			lastChar = "|"
 		} else {
-			window[i][cy] = "./'"
-			lastChar = "./'"
+			window[i][cy] = "^"
+			lastChar = "^"
 		}
 		write(writer, window)
 		time.Sleep(3 * time.Millisecond)
@@ -110,6 +113,7 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 }
 
 func write(writer *bufio.Writer, cells *[ROWS][COLS]string) {
+	outputWriterLock.Lock()
 	for i := 0; i < ROWS; i++ {
 		for j := 0; j < COLS; j++ {
 			fmt.Fprintf(writer, "%v ", cells[i][j])
@@ -118,33 +122,43 @@ func write(writer *bufio.Writer, cells *[ROWS][COLS]string) {
 	}
 	fmt.Fprint(writer, "\033[H\033[0m") // "\033[0m" -> Reset text formatting
 	writer.Flush()                      // Flush the clear screen command immediately
+	outputWriterLock.Unlock()
+}
+
+func create(cells *[ROWS][COLS]string, writer *bufio.Writer, wg *sync.WaitGroup) {
+	defer wg.Done()
+	xCoord := int(rand.Uint32() % uint32(ROWS))
+	yCoord := int(rand.Uint32() % uint32(COLS))
+
+	// center the coordinates
+	xCoord = max(xCoord, 20)
+	xCoord = min(xCoord, 30)
+	yCoord = max(yCoord, 20)
+	yCoord = min(yCoord, 80)
+	for i := 0; i < ROWS; i++ {
+		for j := 0; j < COLS; j++ {
+			cells[i][j] = " "
+		}
+	}
+	depth := int(rand.Intn(6)) + 2
+	renderFirework(xCoord, yCoord, cells, depth, writer)
 }
 
 func render() {
+	cells := [ROWS][COLS]string{}
 	writer := bufio.NewWriter(os.Stdout)
 	for {
 		fmt.Fprint(writer, "\033[H\033[0m") /* Write ANSI escape sequence to move the cursor to top left corner. Although, this
 		   sequence is not meant for clearing the screen but it works for me ¯\_(ツ)_/¯ i.e
 		   clears the screen. And the actual sequence \033[2J that should clear the screen
 		   doesn"t work. */
-
 		writer.Flush() // Flush the clear screen command immediately
-
-		xCoord := int(rand.Uint32() % uint32(ROWS))
-		yCoord := int(rand.Uint32() % uint32(COLS))
-
-		// center the coordinates
-		xCoord = max(xCoord, 20)
-		xCoord = min(xCoord, 30)
-		yCoord = max(yCoord, 20)
-		yCoord = min(yCoord, 80)
-		cells := [ROWS][COLS]string{}
-		for i := 0; i < ROWS; i++ {
-			for j := 0; j < COLS; j++ {
-				cells[i][j] = " "
-			}
+		fireworks := rand.Intn(5) + 1
+		wg := sync.WaitGroup{}
+		for i := 0; i <= fireworks; i++ {
+			wg.Add(1)
+			go create(&cells, writer, &wg)
 		}
-		depth := int(rand.Intn(6)) + 2
-		renderFirework(xCoord, yCoord, &cells, depth, writer)
+		wg.Wait()
 	}
 }
