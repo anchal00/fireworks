@@ -47,6 +47,7 @@ func getRandomColour() string {
 
 func getRandomChar() string {
 	markers := []string{
+		"~",
 		"x",
 		"X",
 		"*",
@@ -67,7 +68,13 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 			lastChar = "./'"
 		}
 		write(writer, window)
-		time.Sleep(7 * time.Millisecond)
+		time.Sleep(3 * time.Millisecond)
+	}
+	// Fade away seq 1
+	for i := ROWS - 1; i > cx; i-- {
+		window[i][cy] = " "
+		write(writer, window)
+		time.Sleep(1 * time.Millisecond)
 	}
 	explosionMarker := getRandomChar()
 	for i := 1; i <= radius; i++ {
@@ -83,9 +90,9 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 			}
 		}
 		write(writer, window)
-		time.Sleep(150 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
-	// Fade away seq 1
+	// Fade away seq 2
 	for i := 1; i <= radius; i++ {
 		for y := COLS - 1; y >= 0; y-- {
 			for x := ROWS - 1; x >= 0; x-- {
@@ -98,13 +105,7 @@ func renderFirework(cx, cy int, window *[ROWS][COLS]string, radius int, writer *
 			}
 		}
 		write(writer, window)
-		time.Sleep(150 * time.Millisecond)
-	}
-	// Fade away seq 2
-	for i := ROWS - 1; i > cx; i-- {
-		window[i][cy] = " "
-		write(writer, window)
-		time.Sleep(5 * time.Millisecond)
+		time.Sleep(120 * time.Millisecond)
 	}
 }
 
